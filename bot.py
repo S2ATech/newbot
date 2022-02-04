@@ -13,6 +13,7 @@ from telegram.ext import (
     PicklePersistence,
 )
 from telegram.utils import helpers
+from flask import Flask, render_template, request
 import telegram
 import pymongo
 import logging
@@ -53,6 +54,8 @@ TELEGRAM_LINKS = "\n".join(TELEGRAM_LINKS)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
 
 logger = logging = logger(_neme_)
+
+app = Flask(__name__)
 # %% Message Strings
 if(COIN_PRICE == "0"):
     SYMBOL = ""
@@ -485,11 +488,19 @@ dispatcher.add_handler(CommandHandler("stats", getStats))
 dispatcher.add_handler(CommandHandler("bot", setStatus))
 dispatcher.add_handler(conv_handler)
 # %% start the bot
-    
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+ @app.route("/", methods=['GET', 'POST'])
 
-if __name__ == '__main__':
-    main()
+def webhook():
+    bot = telegram.Bot(token=os.environ["YOURAPIKEY"])
+    if request.method == "POST":
+        update = telegram.Update.de_json(request.get_json(force=True), bot)
+        chat_id     = update.effective_chat.id
+        text        = update.message.text
+        first_name  = update.effective_chat.first_name
+        # Reply with the same message
+        bot.sendMessage(chat_id=chat_id, text=f"{text} {first_name}")
+        return 'ok'
+    return 'error'
+
+def index():
+    return webhook()
