@@ -491,7 +491,7 @@ dispatcher.add_handler(conv_handler)
  @app.route("/", methods=['GET', 'POST'])
 
 def webhook():
-    bot = telegram.Bot(token=os.environ["YOURAPIKEY"])
+    bot = telegram.Bot(token=os.environ["BOT_TOKEN"])
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), bot)
         chat_id     = update.effective_chat.id
