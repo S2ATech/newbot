@@ -20,7 +20,7 @@ import logging
 import os
 import pickle
 # from dotenv import load_dotenv
-PORT = int(os.environ.get('PORT', '8443'))
+
 
 # load_dotenv()
 USERINFO = {}  # holds user information
@@ -53,10 +53,21 @@ TELEGRAM_LINKS = "\n".join(TELEGRAM_LINKS)
 # %% Setting up things
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
 
-logger = logging = logger(_neme_)
+logger = logging = logger(_name_)
 
 app = Flask(__name__)
 # %% Message Strings
+
+ @app.route("/", methods=['GET', 'POST'])
+
+def webhook():
+    bot = telegram.Bot(token=os.environ["BOT_TOKEN"])
+    if request.method == "POST":
+        update = telegram.Update.de_json(request.get_json(force=True), bot)
+        chat_id     = update.effective_chat.id
+        text        = update.message.text
+        first_name  = update.effective_chat.first_name
+        
 if(COIN_PRICE == "0"):
     SYMBOL = ""
 else:
@@ -66,7 +77,7 @@ if(EXPLORER_URL != ""):
 if(WEBSITE_URL != ""):
     WEBSITE_URL = f"\nWebsite: {WEBSITE_URL}"
 WELCOME_MESSAGE = f"""
-Hello, NAME! I am your friendly {COIN_NAME} Airdrop bot
+Hello, {first_name} I am your friendly {COIN_NAME} Airdrop bot
 {SYMBOL}
 🔸For Joining - Get {AIRDROP_AMOUNT} {COIN_SYMBOL}
 ⭐️ For each referral - Get {"{:,.2f}".format(REFERRAL_REWARD)} {COIN_SYMBOL}
@@ -488,18 +499,8 @@ dispatcher.add_handler(CommandHandler("stats", getStats))
 dispatcher.add_handler(CommandHandler("bot", setStatus))
 dispatcher.add_handler(conv_handler)
 # %% start the bot
- @app.route("/", methods=['GET', 'POST'])
 
-def webhook():
-    bot = telegram.Bot(token=os.environ["BOT_TOKEN"])
-    if request.method == "POST":
-        update = telegram.Update.de_json(request.get_json(force=True), bot)
-        chat_id     = update.effective_chat.id
-        text        = update.message.text
-        first_name  = update.effective_chat.first_name
-        # Reply with the same message
-        bot.sendMessage(chat_id=chat_id, text=f"{text} {first_name}")
-        return 'ok'
+return 'ok'
     return 'error'
 
 def index():
